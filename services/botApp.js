@@ -84,9 +84,12 @@ let bot;
 
 function getAdapter() {
   if (!adapter) {
+    const tenantId =
+      process.env.MicrosoftAppTenantId || process.env.AZURE_TENANT_ID || undefined;
     adapter = new BotFrameworkAdapter({
       appId: process.env.MicrosoftAppId,
       appPassword: process.env.MicrosoftAppPassword,
+      ...(tenantId ? { channelAuthTenant: tenantId } : {}),
     });
   }
   return adapter;
