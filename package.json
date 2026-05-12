@@ -10,7 +10,9 @@
   "scripts": {
     "start": "node --disable-warning=DEP0169 index.js",
     "dev": "node --disable-warning=DEP0169 --watch index.js",
-    "smoke": "node --disable-warning=DEP0169 scripts/smoke-ado.js"
+    "smoke": "node --disable-warning=DEP0169 scripts/smoke-ado.js",
+    "verify": "node --disable-warning=DEP0169 scripts/verify.js",
+    "build": "npm run verify"
   },
   "dependencies": {
     "azure-devops-node-api": "^15.1.2",

@@ -39,8 +39,38 @@ function helpText() {
     '- `unassign <id>` — clear assignee',
     '- `state <id> <state>` — change state (e.g. Active, Closed)',
     '- `update <id> <state>` — same as `state`',
+    '- `search <keywords>` / `find <keywords>` — title & description (WIQL `CONTAINS WORDS`; `ADO_SEARCH_TOP` optional, max 50)',
+    '- `search <id>` — when `<id>` is digits only, open that work item in the project',
     '- `delete <id>` / `delete task <id>` — delete work item',
   ].join('\n');
+}
+
+const MAX_SEARCH_TITLE_CHARS = 120;
+
+/**
+ * @param {import('azure-devops-node-api/interfaces/WorkItemTrackingInterfaces').WorkItem} wi
+ * @param {string} refName
+ */
+function fieldDisplay(wi, refName) {
+  const f = wi.fields?.[refName];
+  if (f == null) {
+    return '';
+  }
+  if (typeof f === 'object' && f.displayName != null) {
+    return String(f.displayName);
+  }
+  return String(f);
+}
+
+/**
+ * @param {string} s
+ * @param {number} max
+ */
+function truncate(s, max) {
+  if (s.length <= max) {
+    return s;
+  }
+  return `${s.slice(0, max - 1)}…`;
 }
 
 /** @param {import('botbuilder').TurnContext} context */
@@ -65,6 +95,50 @@ async function handleCreateTask(context, text) {
   await context.sendActivity(
     `Created work item **#${wi.id}**${url ? `\n${url}` : ''}`
   );
+  return true;
+}
+
+/** @param {import('botbuilder').TurnContext} context */
+async function handleSearch(context, text, lower) {
+  const mSearch = text.match(/^search\s+/i);
+  const mFind = text.match(/^find\s+/i);
+  const m = mSearch || mFind;
+  if (!m) {
+    return false;
+  }
+  const q = text.slice(m[0].length).trim();
+  if (!q) {
+    await context.sendActivity(
+      'Usage: `search <keywords>` or `find <keywords>` — use `description <id> <text>` to read or set full description.'
+    );
+    return true;
+  }
+  try {
+    const items = await ado.searchWorkItems({ text: q });
+    if (items.length === 0) {
+      await context.sendActivity(`No work items matched **${q}** in this project.`);
+      return true;
+    }
+    const lines = items.map((wi) => {
+      const id = wi.id;
+      const wtype = fieldDisplay(wi, 'System.WorkItemType') || 'Work item';
+      const state = fieldDisplay(wi, 'System.State') || '—';
+      const title = truncate(
+        fieldDisplay(wi, 'System.Title') || '(no title)',
+        MAX_SEARCH_TITLE_CHARS
+      );
+      const assignee = fieldDisplay(wi, 'System.AssignedTo');
+      const assignBit = assignee ? ` · ${assignee}` : '';
+      const url = ado.workItemWebUrl(wi);
+      const link = url ? `\n${url}` : '';
+      return `• **#${id}** [${wtype}] *${state}* — ${title}${assignBit}${link}`;
+    });
+    const header = `**${items.length}** result(s) for \`${q}\``;
+    await context.sendActivity([header, ...lines].join('\n'));
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    await context.sendActivity(`Search failed: ${msg}`);
+  }
   return true;
 }
 
@@ -210,6 +284,7 @@ async function handleState(context, text, lower) {
 
 const handlers = [
   handleCreateTask,
+  handleSearch,
   handleDeleteTask,
   handleTitle,
   handleDescription,

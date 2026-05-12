@@ -121,6 +121,93 @@ function workItemWebUrl(workItem) {
   return workItem?._links?.html?.href;
 }
 
+/** Fields returned for search results (avoid heavy HTML description). */
+const SEARCH_FIELDS = [
+  'System.Id',
+  'System.Title',
+  'System.State',
+  'System.WorkItemType',
+  'System.AssignedTo',
+];
+
+/**
+ * @param {string} value
+ */
+function escapeWiqlLiteral(value) {
+  return String(value).replace(/'/g, "''");
+}
+
+function getSearchDefaultTop() {
+  const n = Number(process.env.ADO_SEARCH_TOP, 10);
+  if (Number.isFinite(n) && n > 0) {
+    return Math.min(Math.floor(n), 50);
+  }
+  return 20;
+}
+
+/**
+ * WIQL search in `ADO_PROJECT`: by id if `text` is all digits, otherwise title/description CONTAINS WORDS.
+ * @param {object} options
+ * @param {string} options.text Non-empty keywords or numeric id
+ * @param {number} [options.top] Max rows (capped at 50)
+ * @param {string} [options.project] Defaults to ADO_PROJECT
+ * @returns {Promise<import('azure-devops-node-api/interfaces/WorkItemTrackingInterfaces').WorkItem[]>}
+ */
+async function searchWorkItems({ text, top, project }) {
+  const proj = project ?? requireEnv('ADO_PROJECT');
+  const wit = await getWorkItemTrackingApi();
+  const limit = Math.min(Math.max(1, top ?? getSearchDefaultTop()), 50);
+  const trimmed = (text || '').trim();
+  if (!trimmed) {
+    throw new Error('searchWorkItems requires non-empty text');
+  }
+
+  const projectLit = escapeWiqlLiteral(proj);
+  /** @type {string} */
+  let wiql;
+  if (/^\d+$/.test(trimmed)) {
+    wiql = `SELECT [System.Id]
+FROM WorkItems
+WHERE [System.TeamProject] = '${projectLit}'
+  AND [System.Id] = ${trimmed}`;
+  } else {
+    const phrase = escapeWiqlLiteral(trimmed.replace(/\s+/g, ' '));
+    wiql = `SELECT [System.Id]
+FROM WorkItems
+WHERE [System.TeamProject] = '${projectLit}'
+  AND (
+    [System.Title] CONTAINS WORDS '${phrase}'
+    OR [System.Description] CONTAINS WORDS '${phrase}'
+  )
+ORDER BY [System.ChangedDate] DESC`;
+  }
+
+  const result = await wit.queryByWiql(
+    { query: wiql },
+    { project: proj },
+    false,
+    limit
+  );
+
+  const refs = result.workItems || [];
+  const ids = refs.map((r) => r.id).filter((id) => id != null);
+  if (ids.length === 0) {
+    return [];
+  }
+
+  const items = await wit.getWorkItems(
+    ids,
+    SEARCH_FIELDS,
+    undefined,
+    undefined,
+    undefined,
+    proj
+  );
+  const list = items || [];
+  const byId = new Map(list.map((wi) => [wi.id, wi]));
+  return ids.map((id) => byId.get(id)).filter(Boolean);
+}
+
 function resetConnectionCache() {
   cachedWit = null;
 }
@@ -130,6 +217,7 @@ module.exports = {
   createWorkItem,
   updateWorkItem,
   deleteWorkItem,
+  searchWorkItems,
   workItemWebUrl,
   resetConnectionCache,
 };
