@@ -1,6 +1,6 @@
 'use strict';
 
-require('dotenv').config();
+require('../config/loadEnv');
 
 const { processBotMessage } = require('../services/botApp');
 const { wrapServerResponse } = require('../services/expressLikeServerResponse');

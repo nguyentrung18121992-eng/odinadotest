@@ -17,6 +17,18 @@ function wrapServerResponse(raw) {
       statusCode = code;
       return this;
     },
+    /**
+     * Required by botbuilder ResponseT Zod (adapter.process). Express/Restify compatible.
+     * @param {string} name
+     * @param {string} [value]
+     */
+    header(name, value) {
+      if (value === undefined) {
+        return raw.getHeader(name);
+      }
+      raw.setHeader(name, value);
+      return this;
+    },
     send(body) {
       if (body === undefined || body === null) {
         return this;

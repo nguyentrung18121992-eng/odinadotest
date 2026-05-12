@@ -97,7 +97,9 @@ function getBot() {
 async function processBotMessage(req, res) {
   const ad = getAdapter();
   const b = getBot();
-  await ad.process(req, res, (context) => b.run(context));
+  // Use processActivity, not process(): process() runs ResponseT Zod on `res`; plain Node
+  // ServerResponse fails unless fully shimmed. Local Restify responses work with either.
+  await ad.processActivity(req, res, (context) => b.run(context));
 }
 
 module.exports = {
