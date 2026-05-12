@@ -13,6 +13,7 @@ if (fs.existsSync(_envPath)) {
 }
 
 const { ConnectorClient, MicrosoftAppCredentials } = require('botframework-connector');
+const { getBotChannelAuthTenant } = require('./botChannelTenant');
 
 function requireEnv(name) {
   const v = process.env[name];
@@ -30,11 +31,7 @@ class TeamsOutreach {
   constructor(opts = {}) {
     this.appId = opts.appId || requireEnv('MicrosoftAppId');
     this.appPassword = opts.appPassword || requireEnv('MicrosoftAppPassword');
-    this.tenantId =
-      opts.tenantId ||
-      process.env.MicrosoftAppTenantId ||
-      process.env.AZURE_TENANT_ID ||
-      undefined;
+    this.tenantId = opts.tenantId || getBotChannelAuthTenant();
     const base =
       opts.serviceUrl ||
       process.env.TEAMS_SERVICE_URL ||

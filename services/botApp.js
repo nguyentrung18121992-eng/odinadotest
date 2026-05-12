@@ -13,6 +13,7 @@ if (fs.existsSync(_envPath)) {
 }
 
 const { BotFrameworkAdapter, ActivityHandler } = require('botbuilder');
+const { getBotChannelAuthTenant } = require('./botChannelTenant');
 const ado = require('./adoBoardsClient');
 
 const defaultWorkItemType = process.env.ADO_DEFAULT_WORK_ITEM_TYPE || 'Task';
@@ -84,8 +85,7 @@ let bot;
 
 function getAdapter() {
   if (!adapter) {
-    const tenantId =
-      process.env.MicrosoftAppTenantId || process.env.AZURE_TENANT_ID || undefined;
+    const tenantId = getBotChannelAuthTenant();
     adapter = new BotFrameworkAdapter({
       appId: process.env.MicrosoftAppId,
       appPassword: process.env.MicrosoftAppPassword,
