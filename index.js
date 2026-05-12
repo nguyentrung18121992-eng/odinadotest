@@ -1,9 +1,7 @@
 'use strict';
 
-require('./services/loadEnv');
-
-const restify = require('restify');
 const { processBotMessage } = require('./services/botApp');
+const restify = require('restify');
 
 const server = restify.createServer();
 server.use(restify.plugins.bodyParser());

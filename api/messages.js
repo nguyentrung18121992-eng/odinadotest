@@ -1,7 +1,6 @@
 'use strict';
 
-require('../services/loadEnv');
-
+/** Load ./services/botApp first so repo-root `.env` is applied (inline bootstrap there). */
 const { processBotMessage } = require('../services/botApp');
 const { wrapServerResponse } = require('../services/expressLikeServerResponse');
 

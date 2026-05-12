@@ -1,6 +1,16 @@
 'use strict';
 
-require('./loadEnv');
+const path = require('path');
+const fs = require('fs');
+const dotenv = require('dotenv');
+
+const _root = path.join(__dirname, '..');
+const _envPath = path.join(_root, '.env');
+if (fs.existsSync(_envPath)) {
+  dotenv.config({ path: _envPath });
+} else {
+  dotenv.config();
+}
 
 const { BotFrameworkAdapter, ActivityHandler } = require('botbuilder');
 const ado = require('./adoBoardsClient');
