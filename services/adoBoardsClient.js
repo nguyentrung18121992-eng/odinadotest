@@ -101,6 +101,19 @@ async function updateWorkItem({ id, fields, project }) {
 }
 
 /**
+ * Delete (remove) a work item. Uses recycle bin unless destroy=true.
+ * @param {object} options
+ * @param {number} options.id
+ * @param {boolean} [options.destroy] Hard-delete when true
+ * @param {string} [options.project]
+ */
+async function deleteWorkItem({ id, destroy = false, project }) {
+  const wit = await getWorkItemTrackingApi();
+  const proj = project ?? requireEnv('ADO_PROJECT');
+  await wit.deleteWorkItem(id, proj, destroy);
+}
+
+/**
  * @param {import('azure-devops-node-api/interfaces/WorkItemTrackingInterfaces').WorkItem} workItem
  * @returns {string | undefined}
  */
@@ -116,6 +129,7 @@ module.exports = {
   getWorkItemTrackingApi,
   createWorkItem,
   updateWorkItem,
+  deleteWorkItem,
   workItemWebUrl,
   resetConnectionCache,
 };
