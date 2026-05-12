@@ -1,6 +1,6 @@
 'use strict';
 
-require('../config/loadEnv');
+require('../services/loadEnv');
 
 const { processBotMessage } = require('../services/botApp');
 const { wrapServerResponse } = require('../services/expressLikeServerResponse');

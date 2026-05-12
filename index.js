@@ -1,6 +1,6 @@
 'use strict';
 
-require('dotenv').config();
+require('./services/loadEnv');
 
 const restify = require('restify');
 const { processBotMessage } = require('./services/botApp');

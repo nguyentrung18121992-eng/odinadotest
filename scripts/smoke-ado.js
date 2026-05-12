@@ -4,7 +4,7 @@
  * Verifies ADO_PAT / org / project without creating work items.
  * Usage: npm run smoke
  */
-require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
+require('../services/loadEnv');
 
 const azdev = require('azure-devops-node-api');
 

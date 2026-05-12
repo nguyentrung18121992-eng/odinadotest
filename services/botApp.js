@@ -1,6 +1,6 @@
 'use strict';
 
-require('dotenv').config();
+require('./loadEnv');
 
 const { BotFrameworkAdapter, ActivityHandler } = require('botbuilder');
 const ado = require('./adoBoardsClient');
