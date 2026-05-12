@@ -1,4 +1,7 @@
 {
+  "env": {
+    "NODE_OPTIONS": "--disable-warning=DEP0169"
+  },
   "functions": {
     "api/messages.js": {
       "maxDuration": 10,
