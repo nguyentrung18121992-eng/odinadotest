@@ -1,0 +1,21 @@
+{
+  "name": "teamsado-bot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Microsoft Teams bot → Azure Bot Service → Azure DevOps Boards",
+  "main": "index.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "smoke": "node scripts/smoke-ado.js"
+  },
+  "dependencies": {
+    "azure-devops-node-api": "^15.1.2",
+    "botbuilder": "^4.23.1",
+    "dotenv": "^16.4.5",
+    "restify": "^11.1.0"
+  }
+}
