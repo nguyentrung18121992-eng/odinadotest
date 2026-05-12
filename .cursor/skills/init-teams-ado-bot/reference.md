@@ -2,7 +2,7 @@
 
 **Cursor:** read `SKILL.md` in this skill folder first (when, description, verification loop), then use this file for pastable templates.
 
-Use these as **verbatim** starting points in a **new** repository root. Paths are relative to repo root. Create folders `api/`, `services/`, `scripts/` as needed.
+Use these as **verbatim** starting points in a **new** repository root. Paths are relative to repo root. Create folders `api/`, `services/`, `scripts/`, `public/` as needed.
 
 After writing files, run `npm install` and `npm run verify` from the repo root.
 
@@ -42,6 +42,8 @@ After writing files, run `npm install` and `npm run verify` from the repo root.
 
 ```json
 {
+  "buildCommand": "npm run build",
+  "outputDirectory": "public",
   "env": {
     "NODE_OPTIONS": "--disable-warning=DEP0169"
   },
@@ -52,6 +54,47 @@ After writing files, run `npm install` and `npm run verify` from the repo root.
     }
   }
 }
+```
+
+Commit the `public/` folder (at least `index.html`) so a `public` directory exists after `npm run build`. Vercel reports an error if **Project Settings → Output Directory** is `public` (or `vercel.json` sets it) but that folder is missing post-build.
+
+---
+
+## `public/index.html`
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Teams ADO bot</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 36rem;
+        margin: 2rem auto;
+        padding: 0 1rem;
+        line-height: 1.5;
+      }
+      code {
+        background: #f0f0f0;
+        padding: 0.15rem 0.35rem;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Teams ADO bot</h1>
+    <p>
+      Static placeholder so Vercel can use <code>public</code> as the output directory. The
+      Azure Bot messaging endpoint is
+      <code>/api/messages</code>
+      (configure the full HTTPS URL in Azure Bot).
+    </p>
+    <p><a href="/api/messages">GET /api/messages</a> — health text</p>
+  </body>
+</html>
 ```
 
 ---

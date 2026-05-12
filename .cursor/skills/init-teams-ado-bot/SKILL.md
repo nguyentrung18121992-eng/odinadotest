@@ -15,7 +15,7 @@ description: >-
 
 - **Project skill:** copy this folder to `<repo>/.cursor/skills/init-teams-ado-bot/` so Cursor can discover it from that workspace.
 - **User skill:** copy to `~/.cursor/skills/init-teams-ado-bot/` (or the path your Cursor “skills” setting uses) so it applies in any new repository.
-- **Greenfield (empty or unrelated repo):** before writing files, open **`reference.md`** next to this `SKILL.md` and paste the templates (package.json, services, api, scripts, vercel.json, .gitignore, `.env.example`) into the repo root. Then run the **Verification loop** below.
+- **Greenfield (empty or unrelated repo):** before writing files, open **`reference.md`** next to this `SKILL.md` and paste the templates (package.json, services, api, scripts, vercel.json, `public/index.html`, .gitignore, `.env.example`) into the repo root. Then run the **Verification loop** below.
 - **Existing repo that already matches the layout:** follow **Bootstrap order** and **Verification loop**; edit files in place instead of overwriting from `reference.md` unless the user asked for a full scaffold.
 
 ## Goal
@@ -33,6 +33,7 @@ Produce a minimal **Node 18+** app where:
 package.json
 index.js
 vercel.json
+public/index.html
 api/messages.js
 services/botApp.js
 services/botMessageHandlers.js
@@ -75,7 +76,7 @@ Document (empty values only):
 
 7. **`index.js` (local)** — `require('./services/botApp')` before Restify; `bodyParser`; `server.post('/api/messages', ...)` → `processBotMessage(req, res)` **without** wrap (Restify response is already compatible).
 
-8. **`vercel.json`** — `functions.api/messages.js`: `includeFiles: "services/**"` so `botApp` and all `services/*` deploy; optional `maxDuration`; optional root `env.NODE_OPTIONS: --disable-warning=DEP0169`.
+8. **`vercel.json`** — `buildCommand` / `outputDirectory` `public` when the Vercel project expects that folder after `npm run build`; **`public/index.html`** (or similar) must exist in the repo so the directory is present even though `build` only runs verify. **`functions.api/messages.js`**: `includeFiles: "services/**"`; optional `maxDuration`; optional root `env.NODE_OPTIONS: --disable-warning=DEP0169`.
 
 9. **`scripts/smoke-ado.js`** — optional; load same dotenv root pattern; verify ADO connection without creating work items.
 
@@ -156,6 +157,7 @@ Treat **verify** as the minimum bar for “build OK” in a greenfield scaffold 
 | `AADSTS700016` … directory `Bot Framework` | Set `MicrosoftAppTenantId` (or alias) |
 | `Cannot find module …/loadEnv` | Inline dotenv bootstrap in `botApp.js`; do not rely on a tiny unmatched file in serverless bundles |
 | `FUNCTION_INVOCATION_FAILED` | Missing `includeFiles` or missing `services/` file in deployment |
+| No Output Directory `public` after build | Add committed **`public/`** (e.g. `index.html`) and set `vercel.json` **`outputDirectory`** `public` (or clear the dashboard override); `npm run build` must leave that folder on disk |
 
 ## When the user says "init all this code"
 

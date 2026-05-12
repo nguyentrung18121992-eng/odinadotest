@@ -1,4 +1,6 @@
 {
+  "buildCommand": "npm run build",
+  "outputDirectory": "public",
   "env": {
     "NODE_OPTIONS": "--disable-warning=DEP0169"
   },
